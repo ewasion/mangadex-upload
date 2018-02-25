@@ -3,11 +3,11 @@
 
 $config = [
 	'default_regex'  => '/.*v[^\d]*?(\.?\d+(?:\.\d+)*[a-zA-Z]?).*?c[^\d]*?(\.?\d+(?:\.\d+)*[a-zA-Z]?).*?(?:\[(.+)\])?\.(?:zip|cbz)$/i',
-	'default_path'   => 'G:/mangadex-uploads/',            /* Asbolute path */
-	'completed_path' => 'G:/mangadex-uploads/done/',       /* Asbolute path */
-	'default_group'  => '2',                               /* Unknown */
-	'default_lang'   => '1',                               /* English */
-	'session_token'  => 'd8e59dbf11cb1b5586f2b29356d5905f' /* Found in the "mangadex" cookie */
+	'default_path'   => 'G:/mangadex-uploads/',
+	'completed_path' => 'G:/mangadex-uploads/done/',
+	'default_group'  => 2,
+	'default_lang'   => 1,
+	'session_token'  => 'd8e59dbf11cb1b5586f2b29356d5905f'
 ];
 
 $group_db = [
@@ -23,6 +23,13 @@ $group_db = [
 	'wek' => 1371
 ];
 
+$manga_db = [
+	'naruto' => 5,
+	'detective conan' => 153,
+	'nichijou' => 188,
+	'xblade' => 69
+];
+
 /* Make sure directories have a trailing slash */
 $config['default_path'] = rtrim($config['default_path'], '/') . '/';
 $config['completed_path'] = rtrim($config['completed_path'], '/') . '/';
@@ -32,8 +39,8 @@ if(!isset($_POST['regex'])) {?>
   <input required type="text" name="regex" id="regex" value="<?= $config['default_regex'] ?>"> <label for="regex">Regex</label><br>
   <input required type="text" name="path" id="path" value="<?= $config['default_path'] ?>"> <label for="path">Path</label><br>
   <input required type="text" name="completed_path" id="completed_path" value="<?= $config['completed_path'] ?>"> <label for="completed_path">Path for completed uploads</label><br>
-  <input required type="number" name="group" id="group" value="<?= $config['default_group'] ?>"> <label for="group">Group ID</label><br>
-  <input required type="number" name="manga" id="manga"> <label for="manga">Manga ID</label><br>
+  <input required type="number" name="group" id="group" value="<?= $config['default_group'] ?>"> <label for="group">Fallback group ID</label><br>
+  <input required type="number" name="manga" id="manga"> <label for="manga">Fallback manga ID</label><br>
   <input required type="number" name="lang" id="lang" value="<?= $config['default_lang'] ?>"> <label for="lang">Language ID</label><br>
   <input type="submit" value="Start uploading">
 </form><?php
@@ -66,9 +73,16 @@ foreach(scandir($_POST['path']) as $zipfile) {
 		$volume = $matches[1][0];
 		$chapter = $matches[2][0];
 		$group = $_POST['group'];
+		$manga = $_POST['manga'];
 
 		if(!empty($matches[3][0])) {
 			$group = isset($group_db[strtolower($matches[3][0])]) ? $group_db[strtolower($matches[3][0])] : $_POST['group'];
+		}
+		
+		foreach($manga_db as $mango => $id) {
+			if(strpos(strtolower($zipfile), $mango) !== false) {
+				$manga = $id;
+			}
 		}
 
 		/*
@@ -80,14 +94,13 @@ foreach(scandir($_POST['path']) as $zipfile) {
 		/*
 		Multi part chapters
 		*/
-		$chapter = str_replace('a', '.1', $chapter);
-		$chapter = str_replace('b', '.2', $chapter);
-		$chapter = str_replace('c', '.3', $chapter);
-		$chapter = str_replace('d', '.4', $chapter);
-		$chapter = str_replace('e', '.5', $chapter);
+		preg_match('/(.*)([a-zA-Z])$/i', $chapter, $chaptermatches);
+		if(isset($chaptermatches[2])) {
+			$chapter = str_replace($chaptermatches[2], '.' . (ord(strtoupper($chaptermatches[2])) - ord('A') + 1), $chapter);
+		}
 
 		$post = [
-			'manga_id' => $_POST['manga'],
+			'manga_id' => $manga,
 			'chapter_name' => '',
 			'volume_number' => $volume,
 			'chapter_number' => $chapter,
