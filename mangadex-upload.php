@@ -170,6 +170,12 @@ foreach(scandir($_POST['path']) as $zipfile) {
 			exit;
 		}
 
+		if(strpos($result, 'cf.errors.css') !== false) {
+			preg_match('/<span class="cf-error-code">(.*?)<\/span>/', $result, $cfmatch);
+			echo 'Cloudflare error ' . $cfmatch[1];
+			exit;
+		}
+
 		rename($_POST['path'] . $zipfile, $_POST['completed_path'] . $zipfile);
 		echo ' Done.<br>';
 		flush();
