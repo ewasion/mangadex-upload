@@ -17,8 +17,13 @@ An associative array of manga name => manga ID
 
 ## Usage
 
-Add the necessary groups/manga ID mappings  
+Add the necessary groups/manga ID mappings (optional)  
 Specify a directory containing zipped manga  
+Fill in chapter titles (optional)  
 Press "Start uploading"  
 ???  
 Profit
+
+## Examples
+
+An example title list (`naruto-titles.txt`) is included.

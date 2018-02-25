@@ -41,7 +41,9 @@ if(!isset($_POST['regex'])) {?>
   <input required type="text" name="completed_path" id="completed_path" value="<?= $config['completed_path'] ?>"> <label for="completed_path">Path for completed uploads</label><br>
   <input required type="number" name="group" id="group" value="<?= $config['default_group'] ?>"> <label for="group">Fallback group ID</label><br>
   <input required type="number" name="manga" id="manga"> <label for="manga">Fallback manga ID</label><br>
-  <input required type="number" name="lang" id="lang" value="<?= $config['default_lang'] ?>"> <label for="lang">Language ID</label><br>
+  <input required type="number" name="lang" id="lang" value="<?= $config['default_lang'] ?>"> <label for="lang">Language ID</label><br><br>
+  <label for="titles">Chapter titles (number:title)<br>Leave blank to ignore<br></label>
+  <textarea name="titles" id="titles"></textarea><br>
   <input type="submit" value="Start uploading">
 </form><?php
 	exit;
@@ -64,6 +66,16 @@ curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0); /* For dumbos with bad ssl */
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0); /* Remove this if you know you won't need it */
 curl_setopt($ch, CURLOPT_HTTPHEADER, ['X-Requested-With: XMLHttpRequest']);
+
+$line = strtok($_POST['titles'], "\r\n");
+$titles = [];
+
+while($line !== false) {
+	if(strpos($line, ':') !== false) {
+		$titles[substr($line, 0, strpos($line, ':'))] = preg_split('/\d+:/', $line)[1];
+	}
+	$line = strtok("\r\n");
+}
 
 foreach(scandir($_POST['path']) as $zipfile) {
 	if(!in_array($zipfile, ['.', '..', '.DS_Store', 'done'])) {
@@ -99,9 +111,14 @@ foreach(scandir($_POST['path']) as $zipfile) {
 			$chapter = str_replace($chaptermatches[2], '.' . (ord(strtoupper($chaptermatches[2])) - ord('A') + 1), $chapter);
 		}
 
+		/*
+		Chapter titles
+		*/
+		$title = (isset($titles[$chapter]) ? $titles[$chapter] : '');
+
 		$post = [
 			'manga_id' => $manga,
-			'chapter_name' => '',
+			'chapter_name' => $title,
 			'volume_number' => $volume,
 			'chapter_number' => $chapter,
 			'group_id' => $group,
