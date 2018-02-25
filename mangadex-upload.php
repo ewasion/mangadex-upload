@@ -66,6 +66,27 @@ curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0); /* For dumbos with bad ssl */
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0); /* Remove this if you know you won't need it */
 curl_setopt($ch, CURLOPT_HTTPHEADER, ['X-Requested-With: XMLHttpRequest']);
+curl_setopt($ch, CURLOPT_PROGRESSFUNCTION, 'progress_bar');
+curl_setopt($ch, CURLOPT_NOPROGRESS, false);
+
+function progress_bar($resource, $download_size = 0, $downloaded = 0, $upload_size = 0, $uploaded = 0) {
+	global $allprogress;
+	if($uploaded != 0) {
+		$progress = round(($uploaded / $upload_size) * 100);
+		if($progress == 0 && $allprogress != $progress) {
+			$allprogress = $progress;
+			echo '(';
+		}
+		if($progress != 0 && $progress % 10 == 0 && $allprogress != $progress) {
+			$allprogress = $progress;
+			echo $progress.'%';
+			if($progress == 100) {
+				echo ')';
+			}
+			flush();
+		}
+	}
+}
 
 $line = strtok($_POST['titles'], "\r\n");
 $titles = [];
@@ -80,11 +101,12 @@ while($line !== false) {
 
 foreach(scandir($_POST['path']) as $zipfile) {
 	if(!in_array($zipfile, ['.', '..', '.DS_Store', 'done'])) {
+		$allprogress = -1;
 		$matches = [];
 		preg_match_all($_POST['regex'], $zipfile, $matches);
 
-		$volume = $matches[1][0];
-		$chapter = $matches[2][0];
+		$volume = isset($matches[1][0]) ? $matches[1][0] : 0;
+		$chapter = isset($matches[2][0]) ? $matches[2][0] : 0;
 		$group = $_POST['group'];
 		$manga = $_POST['manga'];
 
@@ -117,6 +139,12 @@ foreach(scandir($_POST['path']) as $zipfile) {
 		*/
 		$title = (isset($titles[$chapter]) ? $titles[$chapter] : '');
 
+		/*
+		For volume/chapter 0
+		*/
+		$volume = ($volume == '' ? 0 : $volume);
+		$chapter = ($chapter == '' ? 0 : $chapter);
+
 		$post = [
 			'manga_id' => $manga,
 			'chapter_name' => $title,
@@ -127,15 +155,23 @@ foreach(scandir($_POST['path']) as $zipfile) {
 			'file' => curl_file_create($_POST['path'] . $zipfile)
 		];
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
-		$result = curl_exec($ch);
 
-		if (strpos($result, 'Failed') !== false) {
+		echo '[' . $group . '] Vol.' . $volume . ' Ch.' . $chapter . ' (' . $zipfile . ') ';
+		flush();
+
+		$result = curl_exec($ch);
+		if(curl_errno($ch)){
+			echo 'Error: ' . curl_error($ch);
+			exit;
+		}
+
+		if(strpos($result, 'Failed') !== false) {
 			echo $result;
 			exit;
 		}
 
 		rename($_POST['path'] . $zipfile, $_POST['completed_path'] . $zipfile);
-		echo 'Uploaded [' . $group . '] Vol.' . $volume . ' Ch.' . $chapter . ' (' . $zipfile . ')<br>';
+		echo ' Done.<br>';
 		flush();
 	}
 }
