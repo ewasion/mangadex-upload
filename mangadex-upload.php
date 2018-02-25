@@ -35,7 +35,7 @@ if(!isset($_POST['regex'])) {?>
   <input required type="number" name="group" id="group" value="<?= $config['default_group'] ?>"> <label for="group">Group ID</label><br>
   <input required type="number" name="manga" id="manga"> <label for="manga">Manga ID</label><br>
   <input required type="number" name="lang" id="lang" value="<?= $config['default_lang'] ?>"> <label for="lang">Language ID</label><br>
-  <input type="submit" value="Stat uploading">
+  <input type="submit" value="Start uploading">
 </form><?php
 	exit;
 }
