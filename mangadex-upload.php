@@ -72,14 +72,15 @@ $titles = [];
 
 while($line !== false) {
 	if(strpos($line, ':') !== false) {
-		$titles[substr($line, 0, strpos($line, ':'))] = preg_split('/\d+:/', $line)[1];
+		preg_match('/(\.?\d+(?:\.\d+)?):(.*)/', $line, $split);
+		$titles[$split[1]] = $split[2];
 	}
 	$line = strtok("\r\n");
 }
 
 foreach(scandir($_POST['path']) as $zipfile) {
 	if(!in_array($zipfile, ['.', '..', '.DS_Store', 'done'])) {
-		$matches = array();
+		$matches = [];
 		preg_match_all($_POST['regex'], $zipfile, $matches);
 
 		$volume = $matches[1][0];
