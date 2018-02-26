@@ -101,6 +101,7 @@ while($line !== false) {
 
 foreach(scandir($_POST['path']) as $zipfile) {
 	if(!in_array($zipfile, ['.', '..', '.DS_Store', 'done'])) {
+		$skip = false;
 		$allprogress = -1;
 		$matches = [];
 		preg_match_all($_POST['regex'], $zipfile, $matches);
@@ -161,23 +162,25 @@ foreach(scandir($_POST['path']) as $zipfile) {
 
 		$result = curl_exec($ch);
 		if(curl_errno($ch)){
-			echo 'Error: ' . curl_error($ch);
-			exit;
+			echo 'Skipping. Error: ' . curl_error($ch);
+			$skip = true;
 		}
 
 		if(strpos($result, 'Failed') !== false) {
-			echo $result;
-			exit;
+			echo 'Skipping. ' . $result;
+			$skip = true;
 		}
 
 		if(strpos($result, 'cf.errors.css') !== false) {
 			preg_match('/<span class="cf-error-code">(.*?)<\/span>/', $result, $cfmatch);
-			echo 'Cloudflare error ' . $cfmatch[1];
-			exit;
+			echo 'Skipping. Cloudflare error ' . $cfmatch[1];
+			$skip = true;
 		}
 
-		rename($_POST['path'] . $zipfile, $_POST['completed_path'] . $zipfile);
-		echo ' Done.<br>';
+		if(!$skip) {
+			rename($_POST['path'] . $zipfile, $_POST['completed_path'] . $zipfile);
+			echo ' Done.<br>';
+		}
 		flush();
 	}
 }
