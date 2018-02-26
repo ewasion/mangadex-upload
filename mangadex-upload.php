@@ -179,8 +179,9 @@ foreach(scandir($_POST['path']) as $zipfile) {
 
 		if(!$skip) {
 			rename($_POST['path'] . $zipfile, $_POST['completed_path'] . $zipfile);
-			echo ' Done.<br>';
+			echo ' Done.';
 		}
+		echo '<br>';
 		flush();
 	}
 }
