@@ -172,7 +172,7 @@ foreach(scandir($_POST['path']) as $zipfile) {
 		}
 
 		if(strpos($result, 'cf.errors.css') !== false) {
-			preg_match('/<span class="cf-error-code">(.*?)<\/span>/', $result, $cfmatch);
+			preg_match('/<title>.* \| (.*)<\/title>/', $result, $cfmatch);
 			echo 'Skipping. Cloudflare error ' . $cfmatch[1];
 			$skip = true;
 		}
