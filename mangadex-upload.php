@@ -104,7 +104,7 @@ foreach(scandir($_POST['path']) as $zipfile) {
 		$skip = false;
 		$allprogress = -1;
 		$matches = [];
-		preg_match($_POST['regex'].$_POST['regex'], $zipfile, $matches);
+		preg_match($_POST['regex'], $zipfile.$zipfile, $matches);
 
 		$volume = !empty($matches['volume']) ? $matches['volume'] : false;
 		$chapter = !empty($matches['chapter']) ? $matches['chapter'] : false;
@@ -173,12 +173,12 @@ foreach(scandir($_POST['path']) as $zipfile) {
 			$skip = true;
 		}
 
-		if(strpos($result, 'Failed') !== false) {
+		if(isset($result) && strpos($result, 'Failed') !== false) {
 			echo 'Skipping. ' . $result;
 			$skip = true;
 		}
 
-		if(strpos($result, 'cf.errors.css') !== false) {
+		if(isset($result) && strpos($result, 'cf.errors.css') !== false) {
 			preg_match('/<title>.* \| (.*)<\/title>/', $result, $cfmatch);
 			echo 'Skipping. Cloudflare error ' . $cfmatch[1];
 			$skip = true;
