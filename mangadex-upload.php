@@ -106,8 +106,8 @@ foreach(scandir($_POST['path']) as $zipfile) {
 		$matches = [];
 		preg_match_all($_POST['regex'], $zipfile, $matches);
 
-		$volume = isset($matches[1][0]) ? $matches[1][0] : 0;
-		$chapter = isset($matches[2][0]) ? $matches[2][0] : 0;
+		$volume = isset($matches[1][0]) ? $matches[1][0] : false;
+		$chapter = isset($matches[2][0]) ? $matches[2][0] : false;
 		$group = $_POST['group'];
 		$manga = $_POST['manga'];
 
@@ -124,8 +124,8 @@ foreach(scandir($_POST['path']) as $zipfile) {
 		/*
 		Remove leading 0s
 		*/
-		$volume = ltrim($volume, '0');
-		$chapter = ltrim($chapter, '0');
+		$volume = ($volume !== false) ? ltrim($volume, '0') : false;
+		$chapter = ($chapter !== false) ? ltrim($chapter, '0') : false;
 
 		/*
 		Multi part chapters
@@ -143,8 +143,8 @@ foreach(scandir($_POST['path']) as $zipfile) {
 		/*
 		For volume/chapter 0
 		*/
-		$volume = ($volume == '' ? 0 : $volume);
-		$chapter = ($chapter == '' ? 0 : $chapter);
+		$volume = ($volume === '' ? 0 : $volume);
+		$chapter = ($chapter === '' ? 0 : $chapter);
 
 		$post = [
 			'manga_id' => $manga,
@@ -160,7 +160,13 @@ foreach(scandir($_POST['path']) as $zipfile) {
 		echo '[' . $group . '] Vol.' . $volume . ' Ch.' . $chapter . ' (' . $zipfile . ') ';
 		flush();
 
-		$result = curl_exec($ch);
+		if($chapter !== false) {
+			$result = curl_exec($ch);
+		} else {
+			echo 'Skipping. Regex doesn\'t match';
+			$skip = true;
+		}
+
 		if(curl_errno($ch)){
 			echo 'Skipping. Error: ' . curl_error($ch);
 			$skip = true;
