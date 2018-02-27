@@ -2,7 +2,7 @@
 /* Please only use this script locally or inside a password protected directory */
 
 $config = [
-	'default_regex'  => '/.*v[^\d]*?(\.?\d+(?:\.\d+)*[a-zA-Z]?).*?c[^\d]*?(\.?\d+(?:\.\d+)*[a-zA-Z]?).*?(?:\[(.+)\])?\.(?:zip|cbz)$/i',
+	'default_regex'  => '/.*?(?:\[(?<group0>.+)\].*)?v[^\d]*?(?<volume>\.?\d+(?:\.\d+)*[a-zA-Z]?).*?c[^\d]*?(?<chapter>\.?\d+(?:\.\d+)*[a-zA-Z]?).*?(?:\[(?<group1>.+)\].*)?\.(?:zip|cbz)$/i',
 	'default_path'   => 'G:/mangadex-uploads/',
 	'completed_path' => 'G:/mangadex-uploads/done/',
 	'default_group'  => 2,
@@ -104,15 +104,16 @@ foreach(scandir($_POST['path']) as $zipfile) {
 		$skip = false;
 		$allprogress = -1;
 		$matches = [];
-		preg_match_all($_POST['regex'], $zipfile, $matches);
+		preg_match($_POST['regex'].$_POST['regex'], $zipfile, $matches);
 
-		$volume = isset($matches[1][0]) ? $matches[1][0] : false;
-		$chapter = isset($matches[2][0]) ? $matches[2][0] : false;
+		$volume = !empty($matches['volume']) ? $matches['volume'] : false;
+		$chapter = !empty($matches['chapter']) ? $matches['chapter'] : false;
 		$group = $_POST['group'];
 		$manga = $_POST['manga'];
 
-		if(!empty($matches[3][0])) {
-			$group = isset($group_db[strtolower($matches[3][0])]) ? $group_db[strtolower($matches[3][0])] : $_POST['group'];
+		if(!empty($matches['group0']) || !empty($matches['group1'])) {
+			$groupname = !empty($matches['group1']) ? $matches['group1'] : $matches['group0'];
+			$group = isset($group_db[strtolower($groupname)]) ? $group_db[strtolower($groupname)] : $_POST['group'];
 		}
 		
 		foreach($manga_db as $mango => $id) {
