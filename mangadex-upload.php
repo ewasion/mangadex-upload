@@ -82,16 +82,8 @@ function id_name($source) {
 }
 
 $titles = id_name($_POST['titles']);
-$group_db = id_name(file_get_contents('groups.txt'));
-$manga_db = id_name(file_get_contents('manga.txt'));
-
-while($line !== false) {
-	if(strpos($line, ':') !== false) {
-		preg_match('/(\.?\d+(?:\.\d+)?):(.*)/', $line, $split);
-		$titles[$split[1]] = $split[2];
-	}
-	$line = strtok("\r\n");
-}
+$group_db = id_name(strtolower(file_get_contents('groups.txt')));
+$manga_db = id_name(strtolower(file_get_contents('manga.txt')));
 
 foreach(scandir($_POST['path']) as $zipfile) {
 	if(!in_array($zipfile, ['.', '..', '.DS_Store', 'done', 'groups.txt', 'manga.txt', 'index.php', 'mangadex-upload.php'])) {
