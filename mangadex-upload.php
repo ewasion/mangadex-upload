@@ -2,7 +2,7 @@
 /* Please only use this script locally or inside a password protected directory */
 
 $config = [
-	'default_regex'  => '/.*?(?:\[(?<group0>[^\]]+)\].*)?v[^\dc]*?(?<volume>\.?\d+(?:\.\d+)*[a-zA-Z]?).*?c[^\dv]*?(?<chapter>\.?\d+(?:\.\d+)*[a-zA-Z]?).*?(?:\[(?<group1>[^\]]+)\].*)?\.(?:zip|cbz)$/i',
+	'default_regex'  => '/.*?(?:\[(?<group0>[^\]]+)\].*)?v[^\dc]*?(?<volume>\.?\d+(?:\.\d+)*[a-zA-Z]?(?!\d)).*?c[^\dv]*?(?<chapter>\.?\d+(?:\.\d+)*[a-zA-Z]?(?!\d)).*?(?:\[(?<group1>[^\]]+)\].*)?\.(?:zip|cbz)$/i',
 	'default_path'   => 'G:/mangadex-uploads/',
 	'completed_path' => 'G:/mangadex-uploads/done/',
 	'default_group'  => 2,
