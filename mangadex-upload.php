@@ -10,26 +10,6 @@ $config = [
 	'session_token'  => 'd8e59dbf11cb1b5586f2b29356d5905f'
 ];
 
-$group_db = [
-	'iem' => 1334,
-	'fh' => 621,
-	'inp mangaz' => 128,
-	'kefi' => 1196,
-	'w,tf' => 1335,
-	'bushido' => 645,
-	'binktopia' => 577,
-	'inane' => 937,
-	'project_88' => 1370,
-	'wek' => 1371
-];
-
-$manga_db = [
-	'naruto' => 5,
-	'detective conan' => 153,
-	'nichijou' => 188,
-	'xblade' => 69
-];
-
 /* Make sure directories have a trailing slash */
 $config['default_path'] = rtrim($config['default_path'], '/') . '/';
 $config['completed_path'] = rtrim($config['completed_path'], '/') . '/';
@@ -88,8 +68,22 @@ function progress_bar($resource, $download_size = 0, $downloaded = 0, $upload_si
 	}
 }
 
-$line = strtok($_POST['titles'], "\r\n");
-$titles = [];
+function id_name($source) {
+	$names = [];
+	$line = strtok($source, "\r\n");
+	while($line !== false) {
+		if(strpos($line, ':') !== false) {
+			preg_match('/(\.?\d+(?:\.\d+)?):(.*)/', $line, $split);
+			$names[$split[1]] = $split[2];
+		}
+		$line = strtok("\r\n");
+	}
+	return $names;
+}
+
+$titles = id_name($_POST['titles']);
+$group_db = id_name(file_get_contents('groups.txt'));
+$manga_db = id_name(file_get_contents('manga.txt'));
 
 while($line !== false) {
 	if(strpos($line, ':') !== false) {
@@ -100,7 +94,7 @@ while($line !== false) {
 }
 
 foreach(scandir($_POST['path']) as $zipfile) {
-	if(!in_array($zipfile, ['.', '..', '.DS_Store', 'done'])) {
+	if(!in_array($zipfile, ['.', '..', '.DS_Store', 'done', 'groups.txt', 'manga.txt', 'index.php', 'mangadex-upload.php'])) {
 		$skip = false;
 		$allprogress = -1;
 		$matches = [];
