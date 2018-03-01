@@ -38,7 +38,7 @@ echo 'Uploading...<br>';
 flush();
 
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, 'https://mangadex.com/ajax/actions.ajax.php?function=chapter_upload');
+curl_setopt($ch, CURLOPT_URL, 'https://mangadex.org/ajax/actions.ajax.php?function=chapter_upload');
 curl_setopt($ch, CURLOPT_COOKIE, 'mangadex=' . $config['session_token']);
 curl_setopt($ch, CURLOPT_POST, 1);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
