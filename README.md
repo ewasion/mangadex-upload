@@ -27,3 +27,7 @@ Profit
 ## Examples
 
 An example title list (`naruto-titles.txt`) is included.
+
+## Alternatives
+
+If you're looking for a client-side solution, [try this userscript](https://ewasion.github.io/userscripts/mangadex-upload/).
