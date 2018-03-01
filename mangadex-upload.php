@@ -68,13 +68,17 @@ function progress_bar($resource, $download_size = 0, $downloaded = 0, $upload_si
 	}
 }
 
-function id_name($source) {
+function id_name($source, $reverse = false) {
 	$names = [];
 	$line = strtok($source, "\r\n");
 	while($line !== false) {
 		if(strpos($line, ':') !== false) {
 			preg_match('/(\.?\d+(?:\.\d+)?):(.*)/', $line, $split);
-			$names[$split[1]] = $split[2];
+			if($reverse) {
+				$names[$split[2]] = $split[1];
+			} else {
+				$names[$split[1]] = $split[2];
+			}
 		}
 		$line = strtok("\r\n");
 	}
@@ -82,8 +86,8 @@ function id_name($source) {
 }
 
 $titles = id_name($_POST['titles']);
-$group_db = id_name(strtolower(file_get_contents('groups.txt')));
-$manga_db = id_name(strtolower(file_get_contents('manga.txt')));
+$group_db = id_name(strtolower(file_get_contents('groups.txt')), true);
+$manga_db = id_name(strtolower(file_get_contents('manga.txt')), true);
 
 foreach(scandir($_POST['path']) as $zipfile) {
 	if(!in_array($zipfile, ['.', '..', '.DS_Store', 'done', 'groups.txt', 'manga.txt', 'index.php', 'mangadex-upload.php'])) {
